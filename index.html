@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Matrix Rain Effect */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.15;
+        }
+
+        /* Glowing Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 2;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: #0f0;
+            border-radius: 50%;
+            z-index: 2;
+            animation: float 10s infinite;
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.3),
+                inset 0 0 30px rgba(0, 255, 0, 0.05);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #0f0;
+            animation: pulse 2s infinite;
+            letter-spacing: 3px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Prediction Box */
+        .prediction-box {
+            background: rgba(0, 50, 0, 0.5);
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.2),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #0f0, #0a0, #0f0);
+            z-index: -1;
+            animation: borderRotate 3s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .prediction-label {
+            font-size: 14px;
+            color: #0f0;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .prediction-result {
+            font-size: 48px;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 30px #0f0;
+            letter-spacing: 5px;
+        }
+
+        .prediction-period {
+            font-size: 20px;
+            margin-top: 10px;
+            color: #0a0;
+        }
+
+        /* Input Section */
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 15px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            background: rgba(0, 70, 0, 0.4);
+        }
+
+        input::placeholder {
+            color: #0a0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #0f0, #0a0);
+            border: 2px solid #0f0;
+            color: #000;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* VIP Hack Button */
+        .vip-button {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            border: 2px solid #ff0000;
+            color: #fff;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px auto;
+            width: 100%;
+            text-align: center;
+            animation: vipPulse 2s infinite;
+        }
+
+        .vip-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+        }
+
+        @keyframes vipPulse {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(255, 0, 0, 0.9);
+            }
+        }
+
+        /* History Section */
+        .history-section {
+            background: rgba(0, 30, 0, 0.4);
+            border: 2px solid #0a0;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .history-item {
+            background: rgba(0, 50, 0, 0.3);
+            border-left: 3px solid #0f0;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            animation: slideIn 0.3s ease-out;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: rgba(0, 70, 0, 0.5);
+            transform: translateX(5px);
+        }
+
+        .history-item.next-period {
+            background: rgba(0, 100, 0, 0.4);
+            border-left: 3px solid #0ff;
+            color: #0ff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-item .period-num {
+            color: #0ff;
+            font-weight: bold;
+        }
+
+        .history-item .result-big {
+            color: #ff0;
+            text-shadow: 0 0 5px #ff0;
+        }
+
+        .history-item .result-small {
+            color: #0af;
+            text-shadow: 0 0 5px #0af;
+        }
+
+        /* Scrollbar Styling */
+        .history-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .history-section::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .history-section::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .prediction-result {
+                font-size: 36px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <div class="title">⚡ PREDATOR ⚡</div>
+
+        <div class="prediction-box" id="predictionBox">
+            <div class="prediction-label">NEXT PREDICTION</div>
+            <div class="prediction-result" id="predictionResult">???</div>
+            <div class="prediction-period" id="predictionPeriod">Awaiting Input...</div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="number" id="periodInput" placeholder="Enter Period Number (e.g., 1120)">
+                <button id="startBtn" onclick="startPrediction()">START</button>
+            </div>
+            <button id="nextBtn" onclick="getNextPrediction()" disabled style="width: 100%;">NEXT PREDICTION</button>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title">📊 PREDICTION HISTORY</div>
+            <div id="historyList"></div>
+        </div>
+
+        <a href="https://t.me/HGZYSignalXpert2" target="_blank" class="vip-button">
+            🔥 VIP HACK 🔥
+        </a>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        // Create floating particles
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            document.body.appendChild(particle);
+        }
+
+        // Prediction Logic
+        let currentPeriod = null;
+        let history = [];
+        const MAX_HISTORY = 10;
+
+        function startPrediction() {
+            const input = document.getElementById('periodInput');
+            const period = parseInt(input.value);
+
+            if (!period || period < 1) {
+                alert('Please enter a valid period number');
+                return;
+            }
+
+            currentPeriod = period;
+            input.disabled = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = false;
+
+            getNextPrediction();
+        }
+
+        function getNextPrediction() {
+            if (!currentPeriod) return;
+
+            // Generate random prediction
+            const predictions = ['BIG', 'SMALL'];
+            const result = predictions[Math.floor(Math.random() * predictions.length)];
+
+            // Update prediction box with animation
+            const resultEl = document.getElementById('predictionResult');
+            const periodEl = document.getElementById('predictionPeriod');
+            
+            resultEl.style.opacity = '0';
+            setTimeout(() => {
+                resultEl.textContent = result;
+                resultEl.style.color = result === 'BIG' ? '#ff0' : '#0af';
+                resultEl.style.textShadow = result === 'BIG' ? '0 0 30px #ff0' : '0 0 30px #0af';
+                resultEl.style.opacity = '1';
+            }, 200);
+
+            periodEl.textContent = `Period ${currentPeriod}`;
+
+            // Add to history
+            history.unshift({
+                period: currentPeriod,
+                result: result
+            });
+
+            // Keep only last 10
+            if (history.length > MAX_HISTORY) {
+                history.pop();
+            }
+
+            // Update history display
+            updateHistoryDisplay();
+
+            // Increment period for next prediction
+            currentPeriod++;
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+
+            // Show next period
+            const nextItem = document.createElement('div');
+            nextItem.className = 'history-item next-period';
+            nextItem.innerHTML = `Next → <span class="period-num">Period ${currentPeriod}</span>`;
+            historyList.appendChild(nextItem);
+
+            // Show history
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                const resultClass = item.result === 'BIG' ? 'result-big' : 'result-small';
+                historyItem.innerHTML = `<span class="period-num">Period ${item.period}</span> → <span class="${resultClass}">${item.result}</span>`;
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Allow Enter key to start
+        document.getElementById('periodInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !this.disabled) {
+                startPrediction();
+            }
+        });
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
