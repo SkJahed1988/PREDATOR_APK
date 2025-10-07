@@ -205,7 +205,10 @@ PERIOD: <span id="currentPeriodDisplay"></span>
 </div>
 </div>
 <script>
-const NOTIFICATION_CONFIG={message:'⚠️ সিস্টেম আপডেট চলছে। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন...',showOnLoad:true};
+const NOTIFICATION_CONFIG={message:'⚠️ Dear User,
+This feature is available exclusively to new accounts. Please create a new account and follow the provided instructions to activate the benefit.
+Thank you,
+The Team https://dkwin9.com/#/register?invitationCode=35685100081...',showOnLoad:true};
 function showNotification(){document.getElementById('notificationOverlay').classList.remove('hidden');const now=new Date();const time=now.toLocaleTimeString('en-US',{hour12:false});document.getElementById('notificationTime').textContent='TIMESTAMP: '+time;document.getElementById('notificationMessage').textContent=NOTIFICATION_CONFIG.message}
 document.getElementById('btnOk').addEventListener('click',function(){document.getElementById('notificationOverlay').classList.add('hidden')});
 if(NOTIFICATION_CONFIG.showOnLoad){window.addEventListener('load',function(){setTimeout(showNotification,500)})}
