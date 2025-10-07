@@ -3,91 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hacker Prediction System</title>
+<title>Hacker Prediction System v2.0</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Courier New',monospace;min-height:100vh;background:linear-gradient(135deg,#000,#1a1a1a,#000);color:#4ade80;overflow-x:hidden;padding:20px}
-.matrix-rain{position:fixed;inset:0;opacity:.1;pointer-events:none;overflow:hidden;z-index:1}
-.matrix-column{position:absolute;font-size:14px;color:#22c55e;animation:fall linear infinite;top:-20px;line-height:1.2}
+body{font-family:'Courier New',monospace;min-height:100vh;background:#000;color:#0f0;overflow-x:hidden}
+.matrix-rain{position:fixed;inset:0;opacity:.15;pointer-events:none;overflow:hidden;z-index:1}
+.matrix-column{position:absolute;font-size:14px;color:#0f0;animation:fall linear infinite;top:-20px;line-height:1.2;text-shadow:0 0 5px #0f0}
 @keyframes fall{0%{transform:translateY(-100%);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(100vh);opacity:0}}
 @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+@keyframes glitch{0%,100%{transform:translate(0)}20%{transform:translate(-2px,2px)}40%{transform:translate(-2px,-2px)}60%{transform:translate(2px,2px)}80%{transform:translate(2px,-2px)}}
 @keyframes fadeInScale{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
 @keyframes slideIn{0%{opacity:0;transform:translateX(-20px)}100%{opacity:1;transform:translateX(0)}}
-@keyframes borderGlow{0%,100%{box-shadow:0 0 5px rgba(34,197,94,.5)}50%{box-shadow:0 0 20px rgba(34,197,94,.8),0 0 30px rgba(34,197,94,.4)}}
+@keyframes borderGlow{0%,100%{box-shadow:0 0 5px #0f0,inset 0 0 5px #0f0}50%{box-shadow:0 0 20px #0f0,0 0 30px #0f0,inset 0 0 10px #0f0}}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes ping{75%,100%{transform:scale(2);opacity:0}}
-.container{max-width:1000px;margin:0 auto;position:relative;z-index:10}
-.header{border:2px solid #22c55e;padding:20px;margin-bottom:24px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);box-shadow:0 0 30px rgba(34,197,94,.3);animation:borderGlow 2s ease-in-out infinite;position:relative}
+@keyframes dataStream{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes hexFloat{0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+.notification-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);backdrop-filter:blur(10px);z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeInScale .3s ease-out}
+.notification-modal{background:#000;border:3px solid #0f0;max-width:500px;width:90%;padding:0;box-shadow:0 0 50px #0f0,inset 0 0 20px rgba(0,255,0,.1);position:relative;animation:borderGlow 2s ease-in-out infinite}
+.modal-header{background:rgba(0,255,0,.1);border-bottom:2px solid #0f0;padding:20px;position:relative;overflow:hidden}
+.modal-header::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,0,.2),transparent);animation:dataStream 2s linear infinite}
+.modal-icon{width:80px;height:80px;margin:0 auto 15px;position:relative}
+.bell-icon{font-size:60px;animation:hexFloat 2s ease-in-out infinite;display:block;text-align:center;filter:drop-shadow(0 0 10px #0f0)}
+.modal-title{font-size:24px;text-align:center;font-weight:bold;letter-spacing:3px;text-shadow:0 0 10px #0f0;animation:glitch 3s infinite}
+.modal-body{padding:25px;position:relative}
+.message-text{font-size:16px;line-height:1.8;color:#0f0;text-align:center;margin-bottom:20px;text-shadow:0 0 5px #0f0}
+.timestamp{font-size:12px;color:#0a0;text-align:center;margin-bottom:20px;opacity:.7}
+.modal-footer{padding:20px;border-top:2px solid #0f0;background:rgba(0,255,0,.05)}
+.btn-ok{width:100%;padding:15px;background:#0f0;color:#000;border:2px solid #0f0;font-size:18px;font-weight:bold;cursor:pointer;font-family:'Courier New',monospace;transition:all .3s;text-transform:uppercase;letter-spacing:2px;position:relative;overflow:hidden}
+.btn-ok:hover{background:#000;color:#0f0;box-shadow:0 0 20px #0f0;transform:scale(1.02)}
+.btn-ok::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transform:translateX(-100%);transition:transform .6s}
+.btn-ok:hover::before{transform:translateX(100%)}
+.corner-accent{position:absolute;width:20px;height:20px}
+.corner-tl{top:0;left:0;border-top:3px solid #0f0;border-left:3px solid #0f0}
+.corner-tr{top:0;right:0;border-top:3px solid #0f0;border-right:3px solid #0f0}
+.corner-bl{bottom:0;left:0;border-bottom:3px solid #0f0;border-left:3px solid #0f0}
+.corner-br{bottom:0;right:0;border-bottom:3px solid #0f0;border-right:3px solid #0f0}
+.sparkle{position:absolute;width:4px;height:4px;background:#0f0;border-radius:50%;animation:ping 1.5s cubic-bezier(0,0,.2,1) infinite}
+.sparkle-1{top:20px;left:30px}
+.sparkle-2{top:40px;right:40px;animation-delay:.5s}
+.sparkle-3{bottom:30px;left:50px;animation-delay:1s}
+.data-stream{position:absolute;font-size:10px;color:#0a0;opacity:.3;white-space:nowrap;animation:dataStream 5s linear infinite}
+.container{max-width:1000px;margin:0 auto;position:relative;z-index:10;padding:20px}
+.header{border:2px solid #0f0;padding:20px;margin-bottom:24px;background:rgba(0,0,0,.95);backdrop-filter:blur(10px);box-shadow:0 0 30px #0f0;animation:borderGlow 2s ease-in-out infinite;position:relative}
 .header-content{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.header h1{font-size:24px;font-weight:bold;letter-spacing:2px}
-.header-status{font-size:12px;color:#86efac;display:flex;align-items:center;gap:8px}
-.status-dot{display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 2s ease-in-out infinite}
-.scanline{position:absolute;inset:0;background:linear-gradient(to bottom,transparent,rgba(34,197,94,.1),transparent);animation:scanline 3s linear infinite;pointer-events:none}
-.card{border:2px solid #22c55e;padding:24px;margin-bottom:24px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);box-shadow:0 0 30px rgba(34,197,94,.3);animation:fadeInScale .5s ease-out}
+.header h1{font-size:24px;font-weight:bold;letter-spacing:2px;text-shadow:0 0 10px #0f0}
+.header-status{font-size:12px;color:#0f0;display:flex;align-items:center;gap:8px}
+.status-dot{display:inline-block;width:8px;height:8px;background:#0f0;border-radius:50%;animation:pulse 2s ease-in-out infinite;box-shadow:0 0 10px #0f0}
+.scanline{position:absolute;inset:0;background:linear-gradient(to bottom,transparent,rgba(0,255,0,.1),transparent);animation:scanline 3s linear infinite;pointer-events:none}
+.card{border:2px solid #0f0;padding:24px;margin-bottom:24px;background:rgba(0,0,0,.95);backdrop-filter:blur(10px);box-shadow:0 0 30px #0f0;animation:fadeInScale .5s ease-out;position:relative}
 .input-group{margin-bottom:16px}
-.input-label{display:flex;align-items:center;gap:8px;font-size:14px;color:#86efac;margin-bottom:8px}
+.input-label{display:flex;align-items:center;gap:8px;font-size:14px;color:#0f0;margin-bottom:8px}
 .input-row{display:flex;gap:8px}
-input{flex:1;background:rgba(0,0,0,.8);border:2px solid #22c55e;padding:12px;color:#4ade80;font-family:'Courier New',monospace;font-size:16px;outline:none;transition:all .3s}
-input:focus{border-color:#86efac;box-shadow:0 0 20px rgba(34,197,94,.5)}
+input{flex:1;background:rgba(0,0,0,.9);border:2px solid #0f0;padding:12px;color:#0f0;font-family:'Courier New',monospace;font-size:16px;outline:none;transition:all .3s;text-shadow:0 0 5px #0f0}
+input:focus{border-color:#0f0;box-shadow:0 0 20px #0f0}
 input:disabled{opacity:.5;cursor:not-allowed}
-button{padding:12px 24px;background:#22c55e;color:#000;font-weight:bold;border:2px solid #4ade80;cursor:pointer;font-family:'Courier New',monospace;transition:all .3s;position:relative;overflow:hidden;font-size:14px}
-button:hover:not(:disabled){background:#4ade80;box-shadow:0 0 30px rgba(34,197,94,.7);transform:scale(1.02)}
+button{padding:12px 24px;background:#0f0;color:#000;font-weight:bold;border:2px solid #0f0;cursor:pointer;font-family:'Courier New',monospace;transition:all .3s;position:relative;overflow:hidden;font-size:14px}
+button:hover:not(:disabled){background:#000;color:#0f0;box-shadow:0 0 30px #0f0;transform:scale(1.02)}
 button:disabled{opacity:.5;cursor:not-allowed}
-.btn-full{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;background:rgba(0,0,0,.8);color:#4ade80}
-.btn-full:hover:not(:disabled){background:rgba(34,197,94,.3)}
-.prediction-box{border:2px solid #22c55e;padding:24px;margin-bottom:24px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);box-shadow:0 0 40px rgba(34,197,94,.4);position:relative;overflow:hidden;animation:fadeInScale .5s ease-out}
+.btn-full{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;background:rgba(0,0,0,.9);color:#0f0}
+.btn-full:hover:not(:disabled){background:rgba(0,255,0,.2)}
+.prediction-box{border:2px solid #0f0;padding:24px;margin-bottom:24px;background:rgba(0,0,0,.95);backdrop-filter:blur(10px);box-shadow:0 0 40px #0f0;position:relative;overflow:hidden;animation:fadeInScale .5s ease-out}
 .corner{position:absolute;width:16px;height:16px}
-.corner-tl{top:0;left:0;border-top:2px solid #86efac;border-left:2px solid #86efac}
-.corner-tr{top:0;right:0;border-top:2px solid #86efac;border-right:2px solid #86efac}
-.corner-bl{bottom:0;left:0;border-bottom:2px solid #86efac;border-left:2px solid #86efac}
-.corner-br{bottom:0;right:0;border-bottom:2px solid #86efac;border-right:2px solid #86efac}
 .prediction-content{text-align:center;position:relative;z-index:10}
-.period-info{font-size:14px;color:#86efac;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
-.time-info{font-size:12px;color:#4ade80;margin-bottom:24px;display:flex;align-items:center;justify-content:center;gap:8px}
-.spinner{display:inline-block;width:64px;height:64px;border:4px solid #22c55e;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:32px 0}
-.processing-text{color:#86efac;margin-top:16px;animation:pulse 1.5s ease-in-out infinite}
+.period-info{font-size:14px;color:#0f0;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.time-info{font-size:12px;color:#0f0;margin-bottom:24px;display:flex;align-items:center;justify-content:center;gap:8px}
+.spinner{display:inline-block;width:64px;height:64px;border:4px solid #0f0;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin:32px 0;box-shadow:0 0 20px #0f0}
+.processing-text{color:#0f0;margin-top:16px;animation:pulse 1.5s ease-in-out infinite;text-shadow:0 0 10px #0f0}
 .prediction-result{font-size:28px;font-weight:bold;padding:20px;transition:all .5s}
 .prediction-result.show{transform:scale(1);opacity:1}
 .prediction-result.hide{transform:scale(.5);opacity:0}
-.prediction-big{color:#86efac;animation:pulse 2s ease-in-out infinite}
-.prediction-small{color:#fde047;animation:pulse 2s ease-in-out infinite}
-.prediction-frame{display:inline-block;border:4px solid currentColor;padding:16px 28px;position:relative}
-.prediction-frame .corner-dot{position:absolute;width:12px;height:12px;background:currentColor}
+.prediction-big{color:#0f0;animation:pulse 2s ease-in-out infinite;text-shadow:0 0 20px #0f0}
+.prediction-small{color:#ff0;animation:pulse 2s ease-in-out infinite;text-shadow:0 0 20px #ff0}
+.prediction-frame{display:inline-block;border:4px solid currentColor;padding:16px 28px;position:relative;box-shadow:0 0 20px currentColor}
+.prediction-frame .corner-dot{position:absolute;width:12px;height:12px;background:currentColor;box-shadow:0 0 10px currentColor}
 .corner-dot-tl{top:0;left:0}
 .corner-dot-tr{top:0;right:0}
 .corner-dot-bl{bottom:0;left:0}
 .corner-dot-br{bottom:0;right:0}
-.ping-border{position:absolute;inset:0;border:2px solid #4ade80;opacity:.5;animation:ping 1s cubic-bezier(0,0,.2,1) infinite;pointer-events:none}
-.history-box{border:2px solid #22c55e;padding:16px;margin-bottom:24px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);box-shadow:0 0 30px rgba(34,197,94,.3);animation:fadeInScale .5s ease-out}
+.ping-border{position:absolute;inset:0;border:2px solid #0f0;opacity:.5;animation:ping 1s cubic-bezier(0,0,.2,1) infinite;pointer-events:none}
+.history-box{border:2px solid #0f0;padding:16px;margin-bottom:24px;background:rgba(0,0,0,.95);backdrop-filter:blur(10px);box-shadow:0 0 30px #0f0;animation:fadeInScale .5s ease-out}
 .history-header{font-size:18px;font-weight:bold;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.history-count{margin-left:auto;font-size:12px;color:#166534}
+.history-count{margin-left:auto;font-size:12px;color:#0a0}
 .history-list{max-height:256px;overflow-y:auto}
-.history-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(0,0,0,.6);border:1px solid #166534;margin-bottom:8px;transition:all .3s;animation:slideIn .3s ease-out}
-.history-item:hover{border-color:#22c55e;background:rgba(34,197,94,.2)}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(0,0,0,.8);border:1px solid #0a0;margin-bottom:8px;transition:all .3s;animation:slideIn .3s ease-out}
+.history-item:hover{border-color:#0f0;background:rgba(0,255,0,.2);box-shadow:0 0 10px #0f0}
 .history-left{display:flex;align-items:center;gap:16px}
-.history-period{color:#22c55e;font-weight:bold}
+.history-period{color:#0f0;font-weight:bold;text-shadow:0 0 5px #0f0}
 .history-prediction{font-weight:bold;padding:4px 12px;border:1px solid}
-.history-big{color:#86efac;border-color:#166534;background:rgba(34,197,94,.3)}
-.history-small{color:#fde047;border-color:#713f12;background:rgba(253,224,71,.3)}
-.history-time{font-size:12px;color:#166534}
+.history-big{color:#0f0;border-color:#0a0;background:rgba(0,255,0,.3);box-shadow:0 0 10px #0f0}
+.history-small{color:#ff0;border-color:#aa0;background:rgba(255,255,0,.3);box-shadow:0 0 10px #ff0}
+.history-time{font-size:12px;color:#0a0}
 .telegram-btn{display:block;width:100%;margin-bottom:24px;text-decoration:none}
 .telegram-btn button{width:100%;padding:16px 32px;font-size:18px}
-.footer{margin-top:24px;text-align:center;font-size:12px;color:#166534;animation:pulse 2s ease-in-out infinite}
+.footer{margin-top:24px;text-align:center;font-size:12px;color:#0a0;animation:pulse 2s ease-in-out infinite}
 .footer p{display:flex;align-items:center;justify-content:center;gap:8px}
-.ping-dot{width:4px;height:4px;background:#22c55e;border-radius:50%;animation:ping 1s cubic-bezier(0,0,.2,1) infinite}
+.ping-dot{width:4px;height:4px;background:#0f0;border-radius:50%;animation:ping 1s cubic-bezier(0,0,.2,1) infinite;box-shadow:0 0 5px #0f0}
 .hidden{display:none!important}
-.icon{display:inline-block;width:20px;height:20px}
 </style>
 </head>
 <body>
+<div id="notificationOverlay" class="notification-overlay">
+<div class="notification-modal">
+<div class="corner-accent corner-tl"></div>
+<div class="corner-accent corner-tr"></div>
+<div class="corner-accent corner-bl"></div>
+<div class="corner-accent corner-br"></div>
+<div class="sparkle sparkle-1"></div>
+<div class="sparkle sparkle-2"></div>
+<div class="sparkle sparkle-3"></div>
+<div class="modal-header">
+<div class="modal-icon">
+<span class="bell-icon">🔔</span>
+</div>
+<h2 class="modal-title">SYSTEM ALERT</h2>
+</div>
+<div class="modal-body">
+<p class="message-text" id="notificationMessage">⚠️ সিস্টেম আপডেট চলছে। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন...</p>
+<p class="timestamp" id="notificationTime">TIMESTAMP: LOADING...</p>
+<div class="data-stream" style="top:10px">01001000 01000001 01000011 01001011</div>
+<div class="data-stream" style="bottom:10px;animation-delay:2s">01010011 01011001 01010011 01010100</div>
+</div>
+<div class="modal-footer">
+<button class="btn-ok" id="btnOk">[ OK ]</button>
+</div>
+</div>
+</div>
 <div class="matrix-rain" id="matrixRain"></div>
 <div class="container">
 <div class="header">
 <div class="header-content">
-<span class="icon">⚡</span>
+<span>⚡</span>
 <h1>PREDICTION SYSTEM v2.0</h1>
-<span class="icon" style="margin-left:auto">⚡</span>
+<span style="margin-left:auto">⚡</span>
 </div>
 <div class="header-status">
 <span class="status-dot"></span>
@@ -98,16 +147,14 @@ SYSTEM ONLINE | SECURE CONNECTION ESTABLISHED
 <div class="card">
 <div class="input-group">
 <label class="input-label">
-<span style="color:#4ade80">&gt;</span> ENTER PERIOD NUMBER:
+<span style="color:#0f0">&gt;</span> ENTER PERIOD NUMBER:
 </label>
 <div class="input-row">
 <input type="text" id="periodInput" placeholder="পিরিয়ড নাম্বার লিখুন..." autocomplete="off">
 <button id="generateBtn">GENERATE</button>
 </div>
 </div>
-<button class="btn-full hidden" id="nextPeriodBtn">
-📈 NEXT PERIOD &gt;&gt;
-</button>
+<button class="btn-full hidden" id="nextPeriodBtn">📈 NEXT PERIOD &gt;&gt;</button>
 </div>
 <div class="prediction-box hidden" id="predictionBox">
 <div class="corner corner-tl"></div>
@@ -119,15 +166,13 @@ SYSTEM ONLINE | SECURE CONNECTION ESTABLISHED
 <span class="status-dot"></span>
 PERIOD: <span id="currentPeriodDisplay"></span>
 </div>
-<div class="time-info">
-🕐 <span id="timeDisplay"></span>
-</div>
+<div class="time-info">🕐 <span id="timeDisplay"></span></div>
 <div id="processingSpinner" class="hidden">
 <div class="spinner"></div>
 <div class="processing-text">ANALYZING DATA...</div>
 </div>
 <div id="predictionResult" class="prediction-result hide">
-<div class="prediction-frame" id="predictionFrame">
+<div class="prediction-frame">
 <span id="predictionText"></span>
 <div class="corner-dot corner-dot-tl"></div>
 <div class="corner-dot corner-dot-tr"></div>
@@ -140,15 +185,13 @@ PERIOD: <span id="currentPeriodDisplay"></span>
 </div>
 <div class="history-box hidden" id="historyBox">
 <h2 class="history-header">
-<span style="color:#4ade80">&gt;</span> HISTORY LOG
+<span style="color:#0f0">&gt;</span> HISTORY LOG
 <span class="history-count" id="historyCount">(0 entries)</span>
 </h2>
 <div class="history-list" id="historyList"></div>
 </div>
 <a href="https://t.me/HGZYSignalXpert2" target="_blank" rel="noopener noreferrer" class="telegram-btn">
-<button>
-👥 JOIN NOW GROUP
-</button>
+<button>👥 JOIN NOW GROUP</button>
 </a>
 <div class="footer">
 <p>
@@ -159,7 +202,11 @@ PERIOD: <span id="currentPeriodDisplay"></span>
 </div>
 </div>
 <script>
-function createMatrixRain(){const c=document.getElementById('matrixRain'),cols=15;for(let i=0;i<cols;i++){const col=document.createElement('div');col.className='matrix-column';col.style.left=(i*6.67)+'%';col.style.animationDuration=(3+Math.random()*2)+'s';col.style.animationDelay=(Math.random()*5)+'s';let t='';for(let j=0;j<20;j++)t+='01<br>';col.innerHTML=t;c.appendChild(col)}}
+const NOTIFICATION_CONFIG={message:'⚠️ সিস্টেম আপডেট চলছে। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন...',showOnLoad:true};
+function showNotification(){document.getElementById('notificationOverlay').classList.remove('hidden');const now=new Date();const time=now.toLocaleTimeString('en-US',{hour12:false});document.getElementById('notificationTime').textContent='TIMESTAMP: '+time;document.getElementById('notificationMessage').textContent=NOTIFICATION_CONFIG.message}
+document.getElementById('btnOk').addEventListener('click',function(){document.getElementById('notificationOverlay').classList.add('hidden')});
+if(NOTIFICATION_CONFIG.showOnLoad){window.addEventListener('load',function(){setTimeout(showNotification,500)})}
+function createMatrixRain(){const c=document.getElementById('matrixRain'),cols=20;for(let i=0;i<cols;i++){const col=document.createElement('div');col.className='matrix-column';col.style.left=(i*5)+'%';col.style.animationDuration=(2+Math.random()*3)+'s';col.style.animationDelay=(Math.random()*5)+'s';let t='';const chars='01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';for(let j=0;j<25;j++)t+=chars[Math.floor(Math.random()*chars.length)]+'<br>';col.innerHTML=t;c.appendChild(col)}}
 createMatrixRain();
 let currentPeriod=null,history=[],usedPeriods=[];
 const periodInput=document.getElementById('periodInput'),generateBtn=document.getElementById('generateBtn'),nextPeriodBtn=document.getElementById('nextPeriodBtn'),predictionBox=document.getElementById('predictionBox'),currentPeriodDisplay=document.getElementById('currentPeriodDisplay'),timeDisplay=document.getElementById('timeDisplay'),processingSpinner=document.getElementById('processingSpinner'),predictionResult=document.getElementById('predictionResult'),predictionText=document.getElementById('predictionText'),historyBox=document.getElementById('historyBox'),historyCount=document.getElementById('historyCount'),historyList=document.getElementById('historyList');
@@ -167,7 +214,7 @@ function generatePrediction(){return Math.random()>.5?'BIG':'SMALL'}
 function updateTime(){const n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),s=String(n.getSeconds()).padStart(2,'0');timeDisplay.textContent=h+':'+m+':'+s}
 function addToHistory(p,pred){const n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),s=String(n.getSeconds()).padStart(2,'0'),t=h+':'+m+':'+s;history.unshift({period:p,prediction:pred,timestamp:t});if(history.length>10)history.pop();renderHistory()}
 function renderHistory(){if(history.length===0){historyBox.classList.add('hidden');return}historyBox.classList.remove('hidden');historyCount.textContent='('+history.length+' entries)';let html='';for(let i=0;i<history.length;i++){const e=history[i],c=e.prediction==='BIG'?'history-big':'history-small';html+='<div class="history-item" style="animation-delay:'+(i*.05)+'s"><div class="history-left"><span class="history-period">#'+e.period+'</span><span class="history-prediction '+c+'">'+e.prediction+'</span></div><span class="history-time">🕐 '+e.timestamp+'</span></div>'}historyList.innerHTML=html}
-function showPrediction(p,pred){predictionBox.classList.remove('hidden');currentPeriodDisplay.textContent=p;updateTime();processingSpinner.classList.remove('hidden');predictionResult.classList.add('hide');predictionResult.classList.remove('show');generateBtn.disabled=true;nextPeriodBtn.disabled=true;periodInput.disabled=true;setTimeout(function(){processingSpinner.classList.add('hidden');predictionText.textContent='[ '+pred+' ]';predictionResult.classList.remove('prediction-big','prediction-small');if(pred==='BIG')predictionResult.classList.add('prediction-big');else predictionResult.classList.add('prediction-small');setTimeout(function(){predictionResult.classList.add('show');predictionResult.classList.remove('hide')},100);generateBtn.disabled=false;nextPeriodBtn.disabled=false;periodInput.disabled=false;nextPeriodBtn.classList.remove('hidden');addToHistory(p,pred)},1500)}
+function showPrediction(p,pred){predictionBox.classList.remove('hidden');currentPeriodDisplay.textContent=p;updateTime();processingSpinner.classList.remove('hidden');predictionResult.classList.add('hide');predictionResult.classList.remove('show');generateBtn.disabled=true;nextPeriodBtn.disabled=true;periodInput.disabled=true;setTimeout(function(){processingSpinner.classList.add('hidden');predictionText.textContent='[ '+pred+' ]';predictionResult.classList.remove('prediction-big','prediction-small');if(pred==='BIG')predictionResult.classList.add('prediction-big');else predictionResult.classList.add('prediction-small');setTimeout(function(){predictionResult.classList.add('show');predictionResult.classList.remove('hide')},100);generateBtn.disabled=false;nextPeriodBtn.disabled=false;periodInput.disabled=false;nextPeriodBtn.classList.remove('hidden');addToHistory(p,pred)},2000)}
 generateBtn.addEventListener('click',function(){const p=periodInput.value.trim();if(!p)return;if(usedPeriods.includes(p))return;usedPeriods.push(p);currentPeriod=p;const pred=generatePrediction();showPrediction(p,pred)});
 nextPeriodBtn.addEventListener('click',function(){if(!currentPeriod)return;const n=String(Number(currentPeriod)+1);if(usedPeriods.includes(n))return;usedPeriods.push(n);currentPeriod=n;const pred=generatePrediction();showPrediction(n,pred)});
 periodInput.addEventListener('keypress',function(e){if(e.key==='Enter')generateBtn.click()});
